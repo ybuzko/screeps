@@ -66,7 +66,7 @@ var common = {
         if(source instanceof Source) res = creep.harvest(source);
 
         if(res == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, {reusePath: 10, visualizePathStyle: {stroke: '#ffaa00'}});
+            creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
         }
     },
 
@@ -79,7 +79,7 @@ var common = {
             if(target instanceof Structure) res = creep.repair(target);
         }
         if(res == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, {reusePath: 10, visualizePathStyle: {stroke: '#ff00ff'}});
+            creep.moveTo(target, {visualizePathStyle: {stroke: '#ff00ff'}});
         }
     }
 

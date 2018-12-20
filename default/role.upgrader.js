@@ -5,6 +5,10 @@ var roleUpgrader = {
     /** @param {Creep} creep **/
     run: function(creep) {
 
+        // save controller in memory to avoid problems with workers stepping into adjacent room
+        if(!creep.memory.currentControllerId) {creep.memory.currentControllerId = creep.room.controller.id};
+        var controller = Game.getObjectById(creep.memory.currentControllerId);
+
         if(creep.memory.upgrading && creep.carry.energy == 0) {
             creep.memory.upgrading = false;
             creep.say('🔄 harvest');
@@ -16,7 +20,7 @@ var roleUpgrader = {
 
         if(creep.memory.upgrading) {
             if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {reusePath:10, visualizePathStyle: {stroke: '#ff0000'}});
+                creep.moveTo(controller, {visualizePathStyle: {stroke: '#ff0000'}});
             }
         }
         else {

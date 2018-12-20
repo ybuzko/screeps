@@ -46,7 +46,7 @@ var roleHauler = {
             }
 
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {reusePath:10, visualizePathStyle: {stroke: '#ff0000'}});
+                creep.moveTo(target, {visualizePathStyle: {stroke: '#ff0000'}});
             }
         }
     }

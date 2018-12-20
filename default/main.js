@@ -22,15 +22,16 @@ module.exports.loop = function () {
         // currentRoom.memory.numSources = currentRoom.find(FIND_SOURCES).length
         var sourcesToMine = Math.min(currentRoom.memory.numSources, currentRoom.controller.level); // no need to mine 2 sources at the start
         //var sourcesToMine = 2;
-        if(currentRoom.energyAvailable == currentRoom.energyCapacityAvailable) {
+
+        // find available spawns in current room
+        var spawns = _.filter(Game.spawns, (spawn) => spawn.room == currentRoom && !spawn.spawning);
+
+        if(currentRoom.energyAvailable == currentRoom.energyCapacityAvailable && spawns.length > 0) {
 
             var miners = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'miner');
             var haulers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'hauler');
             var workers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'worker');
             var upgraders = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'upgrader');
-
-            var spawns = _.filter(Game.spawns, (spawn) => spawn.room == currentRoom && !spawn.spawning);
-
             var spawn = spawns[0];
 
             if(miners.length < sourcesToMine) {
@@ -45,7 +46,7 @@ module.exports.loop = function () {
                     if(workers.length < (2 + Math.floor(totalConstructionToDo/3000))) {
                         common.spawnCreep(spawn.name,'worker');
                     } else {
-
+                        // workers can stand in as upgraders, so we get to dedicated upgraders last
                         if(upgraders.length < currentRoom.controller.level) {
                             common.spawnCreep(spawn.name,'upgrader');
                         }
