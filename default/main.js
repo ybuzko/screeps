@@ -28,18 +28,26 @@ module.exports.loop = function () {
             var haulers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'hauler');
             var workers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'worker');
             var upgraders = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'upgrader');
+
+            var spawns = _.filter(Game.spawns, (spawn) => spawn.room == currentRoom && !spawn.spawning);
+
+            var spawn = spawns[0];
+
             if(miners.length < sourcesToMine) {
-                common.spawnCreep('Spawn1','miner');
+                common.spawnCreep(spawn.name,'miner');
             } else {
                 if((haulers.length < sourcesToMine * 3 && workers.length > 0) || haulers.length < 1) {
-                    common.spawnCreep('Spawn1','hauler');
+                    common.spawnCreep(spawn.name,'hauler');
                 } else {
-                    if(workers.length < 5) {
-                        common.spawnCreep('Spawn1','worker');
+                    // if there's a ton of work, bring up more workers
+                    var totalConstructionToDo = 0;
+                    _.each(currentRoom.find(FIND_CONSTRUCTION_SITES), function(s) {totalConstructionToDo += (s.progressTotal - s.progress)});
+                    if(workers.length < (2 + Math.floor(totalConstructionToDo/3000))) {
+                        common.spawnCreep(spawn.name,'worker');
                     } else {
 
                         if(upgraders.length < currentRoom.controller.level) {
-                            common.spawnCreep('Spawn1','upgrader');
+                            common.spawnCreep(spawn.name,'upgrader');
                         }
                     }
                 }
