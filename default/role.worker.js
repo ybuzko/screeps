@@ -19,7 +19,7 @@ var roleWorker = {
             }
 
             if(creep.memory.building) {
-
+                //console.log(creep.name + " is building");
                 if(!creep.memory.currentTargetId || !Game.getObjectById(creep.memory.currentTargetId)) { // we don't have a target or it disappeared
 
                     var targets = creep.room.find(FIND_CONSTRUCTION_SITES).filter(s => s.structureType != STRUCTURE_ROAD); // deprioritize roads
@@ -41,13 +41,16 @@ var roleWorker = {
                             targets = creep.room.find(FIND_STRUCTURES,{filter:(s) => s.structureType === STRUCTURE_ROAD && s.hits < s.hitsMax*0.6});
                         }
                         if(targets.length > 1) { // there's more than one, find the most broken one
-                            targets.sort((a,b) => (a.hits/a.hitsMax - b.hits/b.hitsMax );
+                            targets.sort((a,b) => (a.hits/a.hitsMax - b.hits/b.hitsMax ));
                         }
-                        creep.memory.currentTargetId = targets[0].id;
+                        if(targets.length) {
+                            creep.memory.currentTargetId = targets[0].id;
+                            console.log("Worker " + creep.name + " repairing " + targets[0].id);
+                        }
                     }
                 }
 
-                target = Game.getObjectById(creep.memory.currentTargetId);
+                if(creep.memory.currentTargetId) {target = Game.getObjectById(creep.memory.currentTargetId)};
 
                 if(target) {
                     common.doWork(creep, target);

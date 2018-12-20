@@ -1,3 +1,5 @@
+var common = require('common');
+
 var roleUpgrader = {
 
     /** @param {Creep} creep **/

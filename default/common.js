@@ -6,15 +6,20 @@ var common = {
         var config = [];
         var maxCapacity = Game.spawns[spawn].room.energyCapacityAvailable;
         var remainingCapacity = maxCapacity;
-        var addPart = function(part) {config.push(part); remainingCapacity-=BODYPART_COST[part];};
+        var addPart = function(part) {
+            if (remainingCapacity >= BODYPART_COST[part]) {
+            config.push(part);
+            remainingCapacity-=BODYPART_COST[part];
+            };
+        };
         switch(role) {
             case "miner":
                 addPart(MOVE);
                 while(remainingCapacity >= BODYPART_COST[WORK]) addPart(WORK);
-                if(remainingCapacity >= BODYPART_COST(CARRY) addPart(CARRY);
+                if(remainingCapacity >= BODYPART_COST[CARRY]) addPart(CARRY);
                 break;
             case "upgrader":
-            case "worker:
+            case "worker":
                 addPart(MOVE);
                 if(maxCapacity > 400) addPart(MOVE);
                 while(remainingCapacity >= BODYPART_COST[WORK]) {
@@ -44,7 +49,7 @@ var common = {
         });
         // 2) If there's no container, let's look for dropped energy
         if(!source) {
-            creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, {
+            creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
             filter: (d) => d.resourceType == RESOURCE_ENERGY && d.amount >= creep.carryCapacity/2}); // only consider drops that are worth half our tank or more
         }
         // 3) There's no container and nothing dropped, resort to mining
@@ -69,12 +74,12 @@ var common = {
         var res;
         if(target instanceof ConstructionSite) res = creep.build(target);
         if(target instanceof StructureController) {
-            res = creep.upgradeController(target);}
+            res = creep.upgradeController(target);
         } else {
             if(target instanceof Structure) res = creep.repair(target);
         }
         if(res == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, {reusePath: 10, visualizePathStyle: {stroke: '#ff00ff'}});
+            creep.moveTo(target, {reusePath: 10, visualizePathStyle: {stroke: '#ff00ff'}});
         }
     }
 

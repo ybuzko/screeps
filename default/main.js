@@ -15,35 +15,38 @@ module.exports.loop = function () {
         }
     }
 
-    for(var currentRoom in Game.rooms) {
+    _.each(Game.rooms, function(currentRoom) {
 
         // initialize room params
         if(!currentRoom.memory.numSources) {currentRoom.memory.numSources = currentRoom.find(FIND_SOURCES).length};
-        var sourcesToMine = min(currentRoom.memory.numSources, currentRoom.controller.level); // no need to mine 2 sources at the start
+        // currentRoom.memory.numSources = currentRoom.find(FIND_SOURCES).length
+        var sourcesToMine = Math.min(currentRoom.memory.numSources, currentRoom.controller.level); // no need to mine 2 sources at the start
+        //var sourcesToMine = 2;
+        if(currentRoom.energyAvailable == currentRoom.energyCapacityAvailable) {
 
-        var miners = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'miner');
-
-        if(miners.length < sourcesToMine) {
-            common.spawnCreep('miner');
-        } else {
+            var miners = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'miner');
             var haulers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'hauler');
             var workers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'worker');
-
-            if((haulers.length < sourcesToMine * 3 && workers.length > 0) || haulers.length < 1) {
-                common.spawnCreep('hauler');
+            var upgraders = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'upgrader');
+            if(miners.length < sourcesToMine) {
+                common.spawnCreep('Spawn1','miner');
             } else {
-                if(workers.length < 3) {
-                    common.spawnCreep('worker');
+                if((haulers.length < sourcesToMine * 3 && workers.length > 0) || haulers.length < 1) {
+                    common.spawnCreep('Spawn1','hauler');
                 } else {
-                    var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-                    if(upgraders.length < currentRoom.controller.level) {
-                        common.spawnCreep('upgrader');
+                    if(workers.length < 5) {
+                        common.spawnCreep('Spawn1','worker');
+                    } else {
+
+                        if(upgraders.length < currentRoom.controller.level) {
+                            common.spawnCreep('Spawn1','upgrader');
+                        }
                     }
                 }
             }
         }
 
-        for (var currentSpawn in Game.spawns.filter(s => s.room == currentRoom)) {
+        for (var currentSpawn in _.filter(Game.spawns,(s) => s.room == currentRoom)) {
             if(currentSpawn.spawning) {
                 var spawningCreep = Game.creeps[currentSpawn.spawning.name];
                 currentSpawn.room.visual.text(
@@ -53,7 +56,8 @@ module.exports.loop = function () {
                     {align: 'left', opacity: 0.8});
             }
         }
-    }
+    });
+
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         if(creep.memory.role == 'upgrader') {
@@ -71,5 +75,5 @@ module.exports.loop = function () {
         if(creep.memory.role == 'explorer') {
             roleExplorer.run(creep);
         }
-
+    }
 }

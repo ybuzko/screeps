@@ -1,15 +1,17 @@
+var common = require('common');
+
 var roleHauler = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
 
         if(((creep.memory.collecting && creep.carry.energy < creep.carryCapacity) || (creep.carry.energy < 50))) {
-            creep.say('🔄 collect');
+            // creep.say('🔄 collect');
 
             // 1) Prioritize dropped stuff
-            var source = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, {
+            var source = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
                     filter: (d) => d.resourceType == RESOURCE_ENERGY && d.amount >= creep.carryCapacity/4});
-                });
+
             // 2) Nothing is dropped, let's transfer stuff from the fullest static mining container
             if(!source) {
                 var sources = creep.room.find(FIND_STRUCTURES, {
@@ -26,7 +28,7 @@ var roleHauler = {
             common.getEnergy(creep, source);
         } else {
             creep.memory.collecting = false;
-            creep.say('deliver');
+            // creep.say('deliver');
 
             var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
@@ -46,7 +48,6 @@ var roleHauler = {
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, {reusePath:10, visualizePathStyle: {stroke: '#ff0000'}});
             }
-        }
         }
     }
 };
