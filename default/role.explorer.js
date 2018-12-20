@@ -5,7 +5,7 @@ var roleExplorer = {
         if(!creep.room.controller.my) {
             creep.moveTo(creep.room.controller);
         } else {
-            if(Game.creeps['Explorer1'].pos.x !=0 || Game.creeps['Explorer1'].pos.y != 25) Game.creeps['Explorer1'].moveTo(0, 25);
+            if(Game.creeps['Explorer1'].pos.x !=49 || Game.creeps['Explorer1'].pos.y != 25) Game.creeps['Explorer1'].moveTo(49, 14);
         }
     }  
 }
