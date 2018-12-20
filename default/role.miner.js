@@ -14,7 +14,7 @@ var roleMiner = {
                     var totalParts = 0;
                     _.each(miners, function(m){totalParts + m.body.filter(bp => bp == WORK).length});
                     console.log(totalParts);
-                    return totalParts <= 6;
+                    return totalParts <= 5;
                 };
             });
             if(sources.length > 1) { // nothing has been started yet, let's pick the closest thing

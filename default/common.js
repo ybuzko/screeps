@@ -76,7 +76,10 @@ var common = {
         if(target instanceof StructureController) {
             res = creep.upgradeController(target);
         } else {
-            if(target instanceof Structure) res = creep.repair(target);
+            if(target instanceof Structure) {
+                res = creep.repair(target);
+                if(target.hits == target.hitsMax) creep.memory.currentTargetId = null; // done repairing
+            }
         }
         if(res == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ff00ff'}});

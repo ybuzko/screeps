@@ -36,16 +36,17 @@ var roleWorker = {
                         }
 
                     } else { // nothing to build, let's see if there's anything to repair
-                        console.log("Worker " + creep.name + " looking for things to repair");
-                        targets = creep.room.find(FIND_MY_STRUCTURES,{filter:(s) => s.hits < s.hitsMax*0.8});
-                        console.log(JSON.stringify(targets));
+                        //console.log("Worker " + creep.name + " looking for things to repair");
+                        //console.log(JSON.stringify(creep.room.find(FIND_MY_STRUCTURES)));
+                        targets = creep.room.find(FIND_STRUCTURES).filter((s) => s.structureType != STRUCTURE_ROAD && s.hits < (s.hitsMax*0.8));
+                        //console.log(JSON.stringify(targets));
                         if(!targets.length) { // there are no buildings to repair, look for broken roads
                             targets = creep.room.find(FIND_STRUCTURES,{filter:(s) => s.structureType === STRUCTURE_ROAD && s.hits < s.hitsMax*0.6});
                         }
                         if(targets.length > 1) { // there's more than one, find the most broken one
                             targets.sort((a,b) => (a.hits/a.hitsMax - b.hits/b.hitsMax ));
                         };
-                        console.log("Sorted: " + JSON.stringify(targets));
+                        //console.log("Sorted: " + JSON.stringify(targets));
                         if(targets.length) {
                             creep.memory.currentTargetId = targets[0].id;
                             console.log("Worker " + creep.name + " repairing " + targets[0].id);

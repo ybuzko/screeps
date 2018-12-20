@@ -37,13 +37,13 @@ module.exports.loop = function () {
             if(miners.length < sourcesToMine) {
                 common.spawnCreep(spawn.name,'miner');
             } else {
-                if((haulers.length < sourcesToMine * 3 && workers.length > 0) || haulers.length < 1) {
+                if((haulers.length < sourcesToMine * 2 && workers.length > 0) || haulers.length < 1) {
                     common.spawnCreep(spawn.name,'hauler');
                 } else {
                     // if there's a ton of work, bring up more workers
                     var totalConstructionToDo = 0;
                     _.each(currentRoom.find(FIND_CONSTRUCTION_SITES), function(s) {totalConstructionToDo += (s.progressTotal - s.progress)});
-                    if(workers.length < (2 + Math.floor(totalConstructionToDo/3000))) {
+                    if(workers.length < (1 + Math.floor(totalConstructionToDo/3000))) {
                         common.spawnCreep(spawn.name,'worker');
                     } else {
                         // workers can stand in as upgraders, so we get to dedicated upgraders last
