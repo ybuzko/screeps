@@ -1,6 +1,5 @@
-var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
-var roleBuilder = require('role.builder');
+var roleWorker = require('role.worker');
 var roleMiner = require('role.miner');
 var roleHauler = require('role.hauler');
 var roleExplorer = require('role.explorer');
@@ -20,73 +19,57 @@ module.exports.loop = function () {
 
         // initialize room params
         if(!currentRoom.memory.numSources) {currentRoom.memory.numSources = currentRoom.find(FIND_SOURCES).length};
+        var sourcesToMine = min(currentRoom.memory.numSources, currentRoom.controller.level); // no need to mine 2 sources at the start
 
         var miners = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'miner');
 
-        if(miners.length < currentRoom.memory.numSources) {
+        if(miners.length < sourcesToMine) {
             common.spawnCreep('miner');
         } else {
             var haulers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'hauler');
+            var workers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'worker');
 
-            if(haulers.length < 2) {
-                var newName = 'Hauler' + Game.time;
-                console.log('Spawning new hauler: ' + newName);
-                console.log(Game.spawns['Home'].spawnCreep([WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], newName,
-                    {memory: {role: 'hauler'}}));
+            if((haulers.length < sourcesToMine * 3 && workers.length > 0) || haulers.length < 1) {
+                common.spawnCreep('hauler');
             } else {
-
-                var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-                //console.log('Harvesters: ' + harvesters.length);
-
-                if(builders.length < 2) {
-                    var newName = 'Builder' + Game.time;
-                    console.log('Spawning new builder: ' + newName);
-                    Game.spawns['Home'].spawnCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE], newName,
-                        {memory: {role: 'builder'}});
+                if(workers.length < 3) {
+                    common.spawnCreep('worker');
                 } else {
                     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-                    //console.log('Harvesters: ' + harvesters.length);
-
-                    if(upgraders.length < 1) {
-                        var newName = 'Upgrader' + Game.time;
-                        console.log('Spawning new upgrader: ' + newName);
-                        Game.spawns['Home'].spawnCreep([WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], newName,
-                            {memory: {role: 'upgrader'}});
+                    if(upgraders.length < currentRoom.controller.level) {
+                        common.spawnCreep('upgrader');
                     }
                 }
             }
         }
 
-
-        if(Game.spawns['Home'].spawning) {
-            var spawningCreep = Game.creeps[Game.spawns['Home'].spawning.name];
-            Game.spawns['Home'].room.visual.text(
-                '🛠️' + spawningCreep.memory.role,
-                Game.spawns['Home'].pos.x + 1,
-                Game.spawns['Home'].pos.y,
-                {align: 'left', opacity: 0.8});
-        }
-
-        for(var name in Game.creeps) {
-            var creep = Game.creeps[name];
-            if(creep.memory.role == 'harvester') {
-                roleHarvester.run(creep);
-            }
-            if(creep.memory.role == 'upgrader') {
-                roleUpgrader.run(creep);
-            }
-            if(creep.memory.role == 'builder') {
-                roleBuilder.run(creep);
-            }
-            if(creep.memory.role == 'miner') {
-                roleMiner.run(creep);
-            }
-            if(creep.memory.role == 'hauler') {
-                roleHauler.run(creep);
-            }
-            if(creep.memory.role == 'explorer') {
-                roleExplorer.run(creep);
+        for (var currentSpawn in Game.spawns.filter(s => s.room == currentRoom)) {
+            if(currentSpawn.spawning) {
+                var spawningCreep = Game.creeps[currentSpawn.spawning.name];
+                currentSpawn.room.visual.text(
+                    '🛠️' + spawningCreep.memory.role,
+                    currentSpawn.pos.x + 1,
+                    currentSpawn.pos.y,
+                    {align: 'left', opacity: 0.8});
             }
         }
     }
+    for(var name in Game.creeps) {
+        var creep = Game.creeps[name];
+        if(creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+        if(creep.memory.role == 'worker') {
+            roleWorker.run(creep);
+        }
+        if(creep.memory.role == 'miner') {
+            roleMiner.run(creep);
+        }
+        if(creep.memory.role == 'hauler') {
+            roleHauler.run(creep);
+        }
+        if(creep.memory.role == 'explorer') {
+            roleExplorer.run(creep);
+        }
+
 }
