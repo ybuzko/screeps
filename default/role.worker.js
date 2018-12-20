@@ -49,7 +49,7 @@ var roleWorker = {
                         }
                     }
                 }
-
+                var target = null;
                 if(creep.memory.currentTargetId) {target = Game.getObjectById(creep.memory.currentTargetId)};
 
                 if(target) {
