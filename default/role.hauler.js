@@ -15,7 +15,7 @@ var roleHauler = {
             // 2) Nothing is dropped, let's transfer stuff from the fullest static mining container
             if(!source) {
                 var sources = creep.room.find(FIND_STRUCTURES, {
-                        filter: (s) => s.structureType == STRUCTURE_CONTAINER
+                        filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.pos.findInRange(FIND_SOURCES, 1).length == 0
                 });
                 if(sources.length > 1) {
                     sources.sort((a,b) => b.store[RESOURCE_ENERGY] - a.store[RESOURCE_ENERGY] );
