@@ -6,7 +6,7 @@ var roleWorker = {
     /** @param {Creep} creep **/
     run: function(creep) {
 
-        if (creep.room.controller.level < 2) { // we are at RCL 1, need to rush 2
+        if (creep.room.controller.level < 2 && creep.room.controller.my) { // we are at RCL 1, need to rush 2
             roleUpgrader.run(creep);
         } else {
             if(creep.memory.building && creep.carry.energy == 0) {
@@ -61,6 +61,7 @@ var roleWorker = {
                 } else roleUpgrader.run(creep); // nothing to do at all, let's go upgrade
 
             } else {
+                // console.log(creep.name + " needs energy");
                 var source = common.findClosestEnergySource(creep);
                 if(source) common.getEnergy(creep, source);
             }

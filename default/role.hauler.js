@@ -39,7 +39,16 @@ var roleHauler = {
             if(!target) {
                  target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
+                        return (structure.structureType == STRUCTURE_CONTAINER) &&
+                            _.sum(structure.store) < structure.storeCapacity && structure.pos.findInRange(FIND_SOURCES, 1).length === 0;
+                    }
+                });
+            }
+
+            if(!target) {
+                 target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_STORAGE) &&
                             _.sum(structure.store) < structure.storeCapacity && structure.pos.findInRange(FIND_SOURCES, 1).length === 0;
                     }
                 });

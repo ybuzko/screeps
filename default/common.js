@@ -1,10 +1,34 @@
 var common = {
 
+    err: {
+        "0": "OK",
+        "-1": "ERR_NOT_OWNER",
+        "-2": "ERR_NO_PATH",
+        "-3": "ERR_NAME_EXISTS",
+        "-4": "ERR_BUSY",
+        "-5": "ERR_NOT_FOUND",
+        "-6": "ERR_NOT_ENOUGH_ENERGY",
+        "-6": "ERR_NOT_ENOUGH_RESOURCES",
+        "-7": "ERR_INVALID_TARGET",
+        "-8": "ERR_FULL",
+        "-9": "ERR_NOT_IN_RANGE",
+        "-10": "ERR_INVALID_ARGS",
+        "-11": "ERR_TIRED",
+        "-12": "ERR_NO_BODYPART",
+        "-6": "ERR_NOT_ENOUGH_EXTENSIONS",
+        "-14": "ERR_RCL_NOT_ENOUGH",
+        "-15": "ERR_GCL_NOT_ENOUGH"
+    },
+
     spawnCreep: function(spawn, role) {
 
         var newName = role + Game.time;
         var config = [];
-        var maxCapacity = Game.spawns[spawn].room.energyCapacityAvailable;
+        if(role == 'hauler-long') {
+            var maxCapacity = Game.spawns[spawn].room.energyAvailable;
+        } else {
+            var maxCapacity = Math.min(Game.spawns[spawn].room.energyAvailable, 1000); // for non-longrange creeps, cap the size
+        }
         var remainingCapacity = maxCapacity;
         var addPart = function(part) {
             if (remainingCapacity >= BODYPART_COST[part]) {
@@ -15,8 +39,10 @@ var common = {
         switch(role) {
             case "miner":
                 addPart(MOVE);
+                addPart(MOVE);
+                addPart(MOVE);
                 while(remainingCapacity >= BODYPART_COST[WORK]) addPart(WORK);
-                if(remainingCapacity >= BODYPART_COST[CARRY]) addPart(CARRY);
+                if(remainingCapacity >= BODYPART_COST[MOVE]) addPart(MOVE);
                 break;
             case "upgrader":
             case "worker":
@@ -29,6 +55,13 @@ var common = {
                     } catch(err) {};
                 };
                 break;
+            case "hauler-long":
+                while(remainingCapacity > 0) {
+                    try {addPart(CARRY)} catch(err) {};
+                    try {addPart(CARRY)} catch(err) {};
+                    try {addPart(MOVE)} catch(err) {};
+                };
+                break;
             case "hauler":
                 while(remainingCapacity > 0) {
                     try {addPart(CARRY)} catch(err) {};
@@ -37,15 +70,16 @@ var common = {
                 };
                 break;
         };
-        console.log('Spawning new ' + role + ' "' + newName + '" at spawn "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',') + ']');
+        
         var res = Game.spawns[spawn].spawnCreep(config, newName, {memory: {role: role}});
-        console.log(res);
+        console.log(Game.time + ' Spawning "' + newName + '" at "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',') + ']: ' + common.err(res));
+        //console.log(res);
     },
 
     findClosestEnergySource: function(creep) {
         // 1) Container is preferable
         var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (s) => s.structureType == STRUCTURE_CONTAINER &&  _.sum(s.store) >= creep.carryCapacity
+            filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) &&  _.sum(s.store) >= creep.carryCapacity
         });
         // 2) If there's no container, let's look for dropped energy
         if(!source) {
@@ -62,7 +96,7 @@ var common = {
     getEnergy: function(creep, source){
         var res;
         if(source instanceof Resource) res = creep.pickup(source);
-        if(source instanceof StructureContainer) res = creep.withdraw(source,RESOURCE_ENERGY);
+        if(source instanceof StructureContainer || source instanceof StructureStorage) res = creep.withdraw(source,RESOURCE_ENERGY);
         if(source instanceof Source) res = creep.harvest(source);
 
         if(res == ERR_NOT_IN_RANGE) {
