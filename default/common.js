@@ -24,11 +24,7 @@ var common = {
 
         var newName = role + Game.time;
         var config = [];
-        if(role == 'hauler-long') {
-            var maxCapacity = Game.spawns[spawn].room.energyCapacityAvailable;
-        } else {
-            var maxCapacity = Math.min(Game.spawns[spawn].room.energyCapacityAvailable, 1200); // for non-longrange creeps, cap the size
-        }
+        var maxCapacity = Game.spawns[spawn].room.energyCapacityAvailable;
         var remainingCapacity = maxCapacity;
         var addPart = function(part) {
             if (remainingCapacity >= BODYPART_COST[part]) {
@@ -38,6 +34,8 @@ var common = {
         };
         switch(role) {
             case "miner":
+            case "mineralminer":
+                remainingCapacity = Math.min(Game.spawns[spawn].room.energyCapacityAvailable, 1200); // no point in making miners huge
                 addPart(MOVE);
                 addPart(MOVE);
                 addPart(MOVE);
@@ -46,8 +44,7 @@ var common = {
                 break;
             case "upgrader":
             case "worker":
-                addPart(MOVE);
-                if(maxCapacity > 400) addPart(MOVE);
+                for (var i = 1; i < Math.floor(remainingCapacity/500); i++) {addPart(MOVE);}
                 while(remainingCapacity >= BODYPART_COST[WORK]) {
                     addPart(WORK);
                     try {
@@ -63,6 +60,8 @@ var common = {
                 };
                 break;
             case "hauler":
+            case "mineralhauler":
+                remainingCapacity = Math.min(Game.spawns[spawn].room.energyCapacityAvailable, 1200); // if haulers are too big they'll take forever to restock (?)
                 while(remainingCapacity > 0) {
                     try {addPart(CARRY)} catch(err) {};
                     try {addPart(CARRY)} catch(err) {};
@@ -72,7 +71,9 @@ var common = {
         };
         
         var res = Game.spawns[spawn].spawnCreep(config, newName, {memory: {role: role}});
-        console.log(Game.time + ' Spawning "' + newName + '" at "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',') + ']: ' + common.err[res]);
+        // console.log(Game.time + ' Spawning "' + newName + '" at "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',').toUpperCase() + ']: ' + common.err[res]);
+        console.log("Game.spawns['" + spawn + "'].spawnCreep([" + config.join(',').toUpperCase() + "'], '" + role + "' + Game.time, {memory: {role: '" + role + "'}});");
+        
         //console.log(res);
     },
 
@@ -93,14 +94,16 @@ var common = {
         return source;
     },
 
-    getEnergy: function(creep, source){
+    getEnergy: function(creep, source, resource = RESOURCE_ENERGY){
         var res;
         if(source instanceof Resource) res = creep.pickup(source);
-        if(source instanceof StructureContainer || source instanceof StructureStorage) res = creep.withdraw(source,RESOURCE_ENERGY);
+        if(source instanceof StructureContainer || source instanceof StructureStorage) res = creep.withdraw(source,resource);
         if(source instanceof Source) res = creep.harvest(source);
-
+        //if(creep.memory.role == 'mineralhauler') console.log(common.err[res]);
         if(res == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+            //if(creep.memory.role == 'mineralhauler') console.log("moving to " + source.id);
+            res2 = creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+            //if(creep.memory.role == 'mineralhauler') console.log(common.err[res2]);
         }
     },
 

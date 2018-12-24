@@ -11,7 +11,7 @@ var roleWorker = {
         } else {
             if(creep.memory.building && creep.carry.energy == 0) {
                 creep.memory.building = false;
-                creep.say('🔄 harvest');
+                creep.say('🔄 collect');
             }
             if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
                 creep.memory.building = true;
@@ -49,7 +49,7 @@ var roleWorker = {
                         //console.log("Sorted: " + JSON.stringify(targets));
                         if(targets.length) {
                             creep.memory.currentTargetId = targets[0].id;
-                            console.log("Worker " + creep.name + " repairing " + targets[0].id);
+                            console.log("Worker " + creep.name + " repairing " + targets[0].structureType + " " + targets[0].id) + " at " + JSON.stringify(targets[0].pos);
                         }
                     }
                 }
