@@ -25,9 +25,9 @@ var common = {
         var newName = role + Game.time;
         var config = [];
         if(role == 'hauler-long') {
-            var maxCapacity = Game.spawns[spawn].room.energyAvailable;
+            var maxCapacity = Game.spawns[spawn].room.energyCapacityAvailable;
         } else {
-            var maxCapacity = Math.min(Game.spawns[spawn].room.energyAvailable, 1000); // for non-longrange creeps, cap the size
+            var maxCapacity = Math.min(Game.spawns[spawn].room.energyCapacityAvailable, 1200); // for non-longrange creeps, cap the size
         }
         var remainingCapacity = maxCapacity;
         var addPart = function(part) {
@@ -72,7 +72,7 @@ var common = {
         };
         
         var res = Game.spawns[spawn].spawnCreep(config, newName, {memory: {role: role}});
-        console.log(Game.time + ' Spawning "' + newName + '" at "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',') + ']: ' + common.err(res));
+        console.log(Game.time + ' Spawning "' + newName + '" at "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',') + ']: ' + common.err[res]);
         //console.log(res);
     },
 

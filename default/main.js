@@ -22,6 +22,15 @@ module.exports.loop = function () {
 
     _.each(Game.rooms, function(currentRoom) {
         
+        var hostiles = currentRoom.find(FIND_HOSTILE_CREEPS);
+        if(hostiles.length > 0) {
+            var username = hostiles[0].owner.username;
+            Game.notify('User ${username} spotted in room ${roomName}');
+            var towers = currentRoom.find(
+                FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
+            towers.forEach(tower => tower.attack(hostiles[0]));
+            }
+
         // initialize room params
         if(!currentRoom.memory.numSources) {currentRoom.memory.numSources = currentRoom.find(FIND_SOURCES).length};
         // currentRoom.memory.numSources = currentRoom.find(FIND_SOURCES).length
@@ -30,37 +39,36 @@ module.exports.loop = function () {
 
         // find available spawns in current room
         var spawns = _.filter(Game.spawns, (spawn) => spawn.room == currentRoom && !spawn.spawning);
-        
-        
-        
+
         if(currentRoom.energyAvailable == currentRoom.energyCapacityAvailable && spawns.length > 0) {
 
             var miners = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'miner');
             var minerParts = 0;
             _.each(miners, function(m){minerParts += m.body.filter(bp => bp.type == WORK).length});
             var haulers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'hauler');
+            var haulerParts = 0;
+            _.each(haulers, function(m){haulerParts += m.body.filter(bp => bp.type == CARRY).length});
             var workers = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'worker');
             var upgraders = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'upgrader');
             var haulersLong = _.filter(Game.creeps, (creep) => creep.room == currentRoom && creep.memory.role == 'hauler-long');
             var spawn = spawns[0];
-            common.spawnCreep(spawn.name,'worker');
             // console.log("Total miner parts: " + minerParts);
 
             if(minerParts < sourcesToMine * 4) {
                 
                 common.spawnCreep(spawn.name,'miner');
             } else {
-                if((haulers.length < 1 && workers.length > 0) || haulers.length < 1) {
+                if((haulerParts < 8 && workers.length > 0) || haulers.length < 1) {
                     common.spawnCreep(spawn.name,'hauler');
                 } else {
                     // if there's a ton of work, bring up more workers
                     var totalConstructionToDo = 0;
                     _.each(currentRoom.find(FIND_CONSTRUCTION_SITES), function(s) {totalConstructionToDo += (s.progressTotal - s.progress)});
-                    if(workers.length < (2 + Math.floor(totalConstructionToDo/10000))) {
+                    if(workers.length < (3 + Math.floor(totalConstructionToDo/10000))) {
                         common.spawnCreep(spawn.name,'worker');
                     } else {
                         // workers can stand in as upgraders, so we get to dedicated upgraders last
-                        if(upgraders.length < Math.min(currentRoom.controller.level, 2)) {
+                        if(upgraders.length < Math.min(currentRoom.controller.level, 1)) {
                             common.spawnCreep(spawn.name,'upgrader');
                         } else {
                             //if(haulersLong.length < 2){
