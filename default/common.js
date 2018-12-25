@@ -25,6 +25,7 @@ var common = {
         var newName = role + Game.time;
         var config = [];
         var maxCapacity = Game.spawns[spawn].room.energyCapacityAvailable;
+        
         var remainingCapacity = maxCapacity;
         var addPart = function(part) {
             if (remainingCapacity >= BODYPART_COST[part]) {
@@ -44,7 +45,7 @@ var common = {
                 break;
             case "upgrader":
             case "worker":
-                for (var i = 1; i < Math.floor(remainingCapacity/500); i++) {addPart(MOVE);}
+                for (var i = 0; i < Math.floor(remainingCapacity/500); i++) {addPart(MOVE);}
                 while(remainingCapacity >= BODYPART_COST[WORK]) {
                     addPart(WORK);
                     try {
@@ -62,6 +63,9 @@ var common = {
             case "hauler":
             case "mineralhauler":
                 remainingCapacity = Math.min(Game.spawns[spawn].room.energyCapacityAvailable, 1200); // if haulers are too big they'll take forever to restock (?)
+                var haulers = _.filter(Game.creeps,(c) => c.memory.role == 'hauler');
+                var energyAvail = Game.spawns[spawn].room.energyAvailable;
+                //if(haulers.length == 0)  {remainingCapacity =energyAvail}; // emergency, no haulers
                 while(remainingCapacity > 0) {
                     try {addPart(CARRY)} catch(err) {};
                     try {addPart(CARRY)} catch(err) {};
@@ -72,7 +76,7 @@ var common = {
         
         var res = Game.spawns[spawn].spawnCreep(config, newName, {memory: {role: role}});
         // console.log(Game.time + ' Spawning "' + newName + '" at "' + spawn + '", capacity=' + maxCapacity + ', config=[' + config.join(',').toUpperCase() + ']: ' + common.err[res]);
-        console.log("Game.spawns['" + spawn + "'].spawnCreep([" + config.join(',').toUpperCase() + "'], '" + role + "' + Game.time, {memory: {role: '" + role + "'}});");
+        console.log("Game.spawns['" + spawn + "'].spawnCreep([" + config.join(',').toUpperCase() + "'], '" + role + "' + Game.time, {memory: {role: '" + role + "'}}); // " + common.err[res]);
         
         //console.log(res);
     },
@@ -121,6 +125,16 @@ var common = {
         if(res == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ff00ff'}});
         }
+    },
+    
+    creepsByRole: function(room){
+        var creepsByRole = {};
+        var creepsInThisRoom = _.filter(Game.creeps, c => c.room == room);
+        _.each(creepsInThisRoom, c => {
+            if(!creepsByRole[c.memory.role]) creepsByRole[c.memory.role]=[];
+            creepsByRole[c.memory.role].push(c);
+        });
+        return creepsByRole;
     }
 
 };
